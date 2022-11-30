@@ -1,0 +1,105 @@
+#include <Servo.h>
+
+Servo audience;
+Servo romeo;
+Servo juliet;
+
+const int Rbutton = 2;
+int Rbutton_current = 0;
+int Rbutton_prev = 0;
+
+bool romeoDead = false;
+
+const int Jbutton = 4;
+int Jbutton_current = 0;
+int Jbutton_prev = 0;
+
+bool julietDead = false;
+
+const int led = 13;
+
+int count = 0;
+bool theEnd = false;
+
+void setup()
+{
+  romeo.attach(9);
+  juliet.attach(11);
+  audience.attach(6);
+
+  romeo.write(0);
+  juliet.write(0);
+  audience.write(0);
+
+  pinMode(Rbutton, INPUT);
+  pinMode(Jbutton, INPUT);
+  pinMode(led, OUTPUT);
+  digitalWrite(led, LOW);
+  Serial.begin(9600);
+
+}
+
+void loop()
+{
+  Rbutton_current = digitalRead(Rbutton);
+  Jbutton_current = digitalRead(Jbutton);
+
+  Serial.print(Rbutton_current);
+  Serial.print(" ");
+  Serial.print(Jbutton_current);
+  Serial.print(" count:");
+  Serial.println(count);
+
+  if (Rbutton_current != Rbutton_prev) {
+    if (Rbutton_current == HIGH) {
+      if (!romeoDead) {
+        romeoDead = true;
+        julietDead = false;
+        count ++;
+        Serial.println(count);
+      }
+    }
+
+  }
+
+  if (Jbutton_current != Jbutton_prev) {
+    if (Jbutton_current == HIGH) {
+      if (!julietDead) {
+        julietDead = true;
+        romeoDead = false;
+        count ++;
+        Serial.println(count);
+      }
+    }
+  }
+
+  if (!theEnd) {
+    digitalWrite(led, LOW);
+    if (romeoDead) {
+      romeo.write(90);
+    } else {
+      romeo.write(0);
+    }
+
+    if (julietDead) {
+      juliet.write(90);
+
+    } else {
+      juliet.write(0);
+    }
+  } else {
+    romeo.write(90);
+    juliet.write(90);
+    audience.write(90);
+    digitalWrite(led, HIGH);
+  }
+
+  if (count >= 7) {
+    theEnd = true;
+  }
+
+
+  Rbutton_prev = Rbutton_current;
+  Jbutton_prev = Jbutton_current;
+
+}
